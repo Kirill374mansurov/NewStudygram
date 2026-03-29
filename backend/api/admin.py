@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import (Ingredient, IngredientsRecipe,
-                     Recipe, Tag, TagRecipe, User)
+from .models import (User, Subscription, Topic,
+                     StudyMaterial, Favorite)
 
 
 @admin.register(User)
@@ -16,51 +16,24 @@ class UserAdmin(UserAdmin):
     ordering = ('username',)
 
 
-@admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
+@admin.register(Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(Ingredient)
-class IngredientAdmin(admin.ModelAdmin):
+@admin.register(Topic)
+class TopicAdmin(admin.ModelAdmin):
     pass
 
 
-class IngredientsRecipeAdmin(admin.StackedInline):
-    model = IngredientsRecipe
-    extra = 0
-    verbose_name = 'ингредиент'
-    verbose_name_plural = 'Ингредиенты'
+@admin.register(StudyMaterial)
+class StudyMaterialAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title', 'author',
+                    'content_type', 'level', 'created_at')
+    search_fields = ('title', 'author__username', 'author__email')
+    list_filter = ('content_type', 'level', 'topics')
 
 
-class TagRecipeAdmin(admin.StackedInline):
-    model = TagRecipe
-    extra = 0
-    verbose_name = 'тег'
-    verbose_name_plural = 'Теги'
-
-
-@admin.register(Recipe)
-class RecipeAdmin(admin.ModelAdmin):
-    list_display = (
-        'name',
-        'text',
-        'get_tags',
-        'get_ingredients'
-    )
-    inlines = (
-        IngredientsRecipeAdmin,
-        TagRecipeAdmin
-    )
-
-    @admin.display(
-        description='Теги',
-    )
-    def get_tags(self, obj):
-        return ",\n".join([g.name for g in obj.tags.all()])
-
-    @admin.display(
-        description='Ингредиенты',
-    )
-    def get_ingredients(self, obj):
-        return ",\n".join([g.name for g in obj.ingredients.all()])
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    pass

@@ -15,13 +15,14 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .filters import RecipeFilter
-from .models import (Favorite, Ingredient, IngredientsRecipe, Recipe,
-                     ShoppingCart, Subscription, Tag, User)
+from .filters import StudyMaterialFilter
+from .models import (User, Subscription, Topic,
+                     StudyMaterial, Favorite)
 from .permissions import OwnerOrReadOnly, ReadOnly
-from .serializers import (IngredientsSerializer, RecipeSerializer,
-                          RecipeSmallSerializer, SubscriptionSerializer,
-                          TagSerializer, UserSerializer)
+from .serializers import (StudyMaterialWriteSerializer,
+                          StudyMaterialShortSerializer, TopicSerializer,
+                          SubscriptionSerializer, UserSerializer,
+                          StudyMaterialReadSerializer)
 
 
 class UserViewSet(views.UserViewSet):
@@ -113,128 +114,53 @@ class RetrieveListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
     pass
 
 
-class TagViewSet(RetrieveListViewSet):
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
+class TopicViewSet(RetrieveListViewSet):
+    queryset = Topic.objects.all()
+    serializer_class = TopicSerializer
     pagination_class = None
 
 
-class IngredientViewSet(RetrieveListViewSet):
-    queryset = Ingredient.objects.all()
-    serializer_class = IngredientsSerializer
-    pagination_class = None
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('^name',)
-
-
-class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
+class StudyMaterialViewSet(viewsets.ModelViewSet):
+    queryset = StudyMaterial.objects.all().select_related(
+        'author').prefetch_related('topics')
     permission_classes = (OwnerOrReadOnly,)
-    serializer_class = RecipeSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = RecipeFilter
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filterset_class = StudyMaterialFilter
+    search_fields = ('title',)
 
-    @action(
-        methods=['get'],
-        detail=True,
-        permission_classes=(ReadOnly,),
-        url_path='get-link'
-    )
-    def get_link(self, request, pk):
-        recipe = get_object_or_404(Recipe, pk=pk)
-        return Response(
-            {'short-link': recipe.short_link},
-            status=status.HTTP_200_OK
-        )
+    def get_serializer_class(self):
+        if self.request.method in ('POST', 'PATCH', 'PUT'):
+            return StudyMaterialWriteSerializer
+        return StudyMaterialReadSerializer
 
-    @action(
-        methods=['post', 'delete'],
-        detail=True,
-        permission_classes=(IsAuthenticated,)
-    )
-    def favorite(self, request, pk):
+    @action(methods=['post', 'delete'], detail=True, permission_classes=[IsAuthenticated])
+    def favorite(self, request, pk=None):
         if request.method == 'POST':
-            recipe = get_object_or_404(Recipe, pk=pk)
+            material = get_object_or_404(StudyMaterial, pk=pk)
             created = Favorite.objects.get_or_create(
-                recipe=recipe, user=request.user
+                material=material, user=request.user
             )
             if not created[-1]:
                 return Response(
-                    {'errors': 'Рецепт уже в избранном!'},
+                    {'errors': 'Материал уже в избранном!'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            serializer = RecipeSmallSerializer(
-                recipe, context={'request': request}
+            serializer = StudyMaterialShortSerializer(
+                material, context={'request': request}
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        recipe = get_object_or_404(Recipe, pk=pk)
+        material = get_object_or_404(StudyMaterial, pk=pk)
         try:
             fav_recipe = Favorite.objects.get(
-                recipe=recipe, user=request.user
+                material=material, user=request.user
             )
             fav_recipe.delete()
         except BaseException:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(
-        methods=['post', 'delete'],
-        detail=True,
-        permission_classes=[IsAuthenticated]
-    )
-    def shopping_cart(self, request, pk):
-        if request.method == 'DELETE':
-            recipe = get_object_or_404(Recipe, pk=pk)
-            try:
-                fav_recipe = ShoppingCart.objects.get(
-                    recipe=recipe, user=request.user
-                )
-                fav_recipe.delete()
-            except BaseException:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-            return Response(status=status.HTTP_204_NO_CONTENT)
 
-        recipe = get_object_or_404(Recipe, pk=pk)
-        created = ShoppingCart.objects.get_or_create(
-            recipe=recipe, user=request.user)
-        if not created[-1]:
-            return Response(
-                {'errors': 'Рецепт уже добавлен!'},
-                status.HTTP_400_BAD_REQUEST
-            )
-        serializer = RecipeSmallSerializer(
-            recipe, context={'request': request}
-        )
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    @action(methods=['get'], detail=False,
-            permission_classes=[IsAuthenticated])
-    def download_shopping_cart(self, request):
-        ingredients = IngredientsRecipe.objects.filter(
-            recipe__shopping_cart__user=request.user).values(
-                'ingredient__name',
-                'ingredient__measurement_unit',
-                'amount').order_by('ingredient__name')
-
-        data = defaultdict(int)
-        for ingr in ingredients:
-            key = (
-                f'{ingr["ingredient__name"]} '
-                f'({ingr["ingredient__measurement_unit"]})'
-            )
-            data[key] += ingr['amount']
-        shopping_list = ['СПИСОК ПОКУПОК:\n']
-        for key, value in data.items():
-            shopping_list.append(f'- {key}: {value} \n')
-
-        response = HttpResponse(shopping_list, content_type='text/plain')
-        response['Content-Disposition'] = (
-            'attachment; filename={0}'.format('shopping_list.txt')
-        )
-        return response
-
-
-def redirect_recipe(request, short_id):
+def redirect_material(request, short_id):
     short_link = os.getenv('ALLOWED_HOST') + short_id
-    recipe = get_object_or_404(Recipe, short_link=short_link)
+    recipe = get_object_or_404(StudyMaterial, short_link=short_link)
     return redirect(f'/recipes/{recipe.id}')
