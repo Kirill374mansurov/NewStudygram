@@ -1,118 +1,267 @@
-const BASE_URL = '/api';
-
 class Api {
-  constructor({ baseUrl }) {
+  constructor(baseUrl, headers) {
     this._baseUrl = baseUrl;
+    this._headers = headers;
   }
 
-  _getHeaders() {
-    const token = localStorage.getItem('token');
+  _getToken() {
+    return localStorage.getItem("token");
+  }
+
+  _getHeaders(withAuth = false) {
+    const token = this._getToken();
 
     return {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Token ${token}` } : {}),
+      ...this._headers,
+      ...(withAuth && token ? { authorization: `Token ${token}` } : {}),
     };
   }
 
   _checkResponse(res) {
-    if (res.ok) {
-      return res.json();
+    if (res.status === 204) {
+      return Promise.resolve(null);
     }
-    return res.json().then((err) => Promise.reject(err));
+
+    return res.json().then((data) => {
+      if (res.ok) {
+        return data;
+      }
+      return Promise.reject(data);
+    });
   }
+
+  // auth
+
+  signin({ email, password }) {
+    return fetch("/api/auth/token/login/", {
+      method: "POST",
+      headers: this._getHeaders(),
+      body: JSON.stringify({ email, password }),
+    }).then(this._checkResponse);
+  }
+
+  signout() {
+    return fetch("/api/auth/token/logout/", {
+      method: "POST",
+      headers: this._getHeaders(true),
+    }).then(this._checkResponse);
+  }
+
+  signup({ email, password, username, first_name, last_name }) {
+    return fetch("/api/users/", {
+      method: "POST",
+      headers: this._getHeaders(),
+      body: JSON.stringify({
+        email,
+        password,
+        username,
+        first_name,
+        last_name,
+      }),
+    }).then(this._checkResponse);
+  }
+
+  getUserData() {
+    return fetch("/api/users/me/", {
+      method: "GET",
+      headers: this._getHeaders(true),
+    }).then(this._checkResponse);
+  }
+
+  getUser({ id }) {
+    return fetch(`/api/users/${id}/`, {
+      method: "GET",
+      headers: this._getHeaders(Boolean(this._getToken())),
+    }).then(this._checkResponse);
+  }
+
+  changePassword({ current_password, new_password }) {
+    return fetch("/api/users/set_password/", {
+      method: "POST",
+      headers: this._getHeaders(true),
+      body: JSON.stringify({ current_password, new_password }),
+    }).then(this._checkResponse);
+  }
+
+  resetPassword({ email }) {
+    return fetch("/api/users/reset_password/", {
+      method: "POST",
+      headers: this._getHeaders(),
+      body: JSON.stringify({ email }),
+    }).then(this._checkResponse);
+  }
+
+  changeAvatar({ file }) {
+    return fetch("/api/users/me/avatar/", {
+      method: "PUT",
+      headers: this._getHeaders(true),
+      body: JSON.stringify({ avatar: file }),
+    }).then(this._checkResponse);
+  }
+
+  deleteAvatar() {
+    return fetch("/api/users/me/avatar/", {
+      method: "DELETE",
+      headers: this._getHeaders(true),
+    }).then(this._checkResponse);
+  }
+
+  // topics
 
   getTopics() {
-    return fetch(`${this._baseUrl}/topics/`, {
+    return fetch("/api/topics/", {
+      method: "GET",
       headers: this._getHeaders(),
     }).then(this._checkResponse);
   }
 
-  getMaterials(params = {}) {
-    const query = new URLSearchParams(params).toString();
-    const url = query
-      ? `${this._baseUrl}/materials/?${query}`
-      : `${this._baseUrl}/materials/`;
+  // materials
 
-    return fetch(url, {
-      headers: this._getHeaders(),
+  getMaterials({
+    page = 1,
+    limit = 6,
+    is_favorited = 0,
+    author,
+    topics,
+    search,
+  } = {}) {
+    const params = new URLSearchParams();
+
+    params.set("page", page);
+    params.set("limit", limit);
+
+    if (author) {
+      params.set("author", author);
+    }
+
+    if (is_favorited) {
+      params.set("is_favorited", is_favorited);
+    }
+
+    if (search) {
+      params.set("search", search);
+    }
+
+    if (topics && Array.isArray(topics)) {
+      topics
+        .filter((topic) => topic.value)
+        .forEach((topic) => {
+          params.append("topics", topic.slug);
+        });
+    }
+
+    return fetch(`/api/materials/?${params.toString()}`, {
+      method: "GET",
+      headers: this._getHeaders(Boolean(this._getToken())),
     }).then(this._checkResponse);
   }
 
-  getMaterial(id) {
-    return fetch(`${this._baseUrl}/materials/${id}/`, {
-      headers: this._getHeaders(),
+  getMaterial({ material_id }) {
+    return fetch(`/api/materials/${material_id}/`, {
+      method: "GET",
+      headers: this._getHeaders(Boolean(this._getToken())),
     }).then(this._checkResponse);
   }
 
-  createMaterial(data) {
-    return fetch(`${this._baseUrl}/materials/`, {
-      method: 'POST',
-      headers: this._getHeaders(),
-      body: JSON.stringify(data),
+  createMaterial({
+    title = "",
+    description = "",
+    content_type = "article",
+    link = "",
+    topics = [],
+    estimated_time = null,
+    level = "",
+  }) {
+    return fetch("/api/materials/", {
+      method: "POST",
+      headers: this._getHeaders(true),
+      body: JSON.stringify({
+        title,
+        description,
+        content_type,
+        link: link || null,
+        topics,
+        estimated_time: estimated_time ? Number(estimated_time) : null,
+        level: level || null,
+      }),
     }).then(this._checkResponse);
   }
 
-  updateMaterial(id, data) {
-    return fetch(`${this._baseUrl}/materials/${id}/`, {
-      method: 'PATCH',
-      headers: this._getHeaders(),
-      body: JSON.stringify(data),
+  updateMaterial({
+    material_id,
+    title,
+    description,
+    content_type,
+    link,
+    topics,
+    estimated_time,
+    level,
+  }) {
+    return fetch(`/api/materials/${material_id}/`, {
+      method: "PATCH",
+      headers: this._getHeaders(true),
+      body: JSON.stringify({
+        title,
+        description,
+        content_type,
+        link: link || null,
+        topics,
+        estimated_time: estimated_time ? Number(estimated_time) : null,
+        level: level || null,
+      }),
     }).then(this._checkResponse);
   }
 
-  deleteMaterial(id) {
-    return fetch(`${this._baseUrl}/materials/${id}/`, {
-      method: 'DELETE',
-      headers: this._getHeaders(),
-    }).then((res) => {
-      if (res.ok) return null;
-      return res.json().then((err) => Promise.reject(err));
-    });
-  }
-
-  addFavorite(id) {
-    return fetch(`${this._baseUrl}/materials/${id}/favorite/`, {
-      method: 'POST',
-      headers: this._getHeaders(),
+  deleteMaterial({ material_id }) {
+    return fetch(`/api/materials/${material_id}/`, {
+      method: "DELETE",
+      headers: this._getHeaders(true),
     }).then(this._checkResponse);
   }
 
-  removeFavorite(id) {
-    return fetch(`${this._baseUrl}/materials/${id}/favorite/`, {
-      method: 'DELETE',
-      headers: this._getHeaders(),
-    }).then((res) => {
-      if (res.ok) return null;
-      return res.json().then((err) => Promise.reject(err));
-    });
-  }
+  // favorites
 
-  getSubscriptions() {
-    return fetch(`${this._baseUrl}/users/subscriptions/`, {
-      headers: this._getHeaders(),
+  addToFavorites({ id }) {
+    return fetch(`/api/materials/${id}/favorite/`, {
+      method: "POST",
+      headers: this._getHeaders(true),
     }).then(this._checkResponse);
   }
 
-  subscribe(userId) {
-    return fetch(`${this._baseUrl}/users/${userId}/subscribe/`, {
-      method: 'POST',
-      headers: this._getHeaders(),
+  removeFromFavorites({ id }) {
+    return fetch(`/api/materials/${id}/favorite/`, {
+      method: "DELETE",
+      headers: this._getHeaders(true),
     }).then(this._checkResponse);
   }
 
-  unsubscribe(userId) {
-    return fetch(`${this._baseUrl}/users/${userId}/subscribe/`, {
-      method: 'DELETE',
-      headers: this._getHeaders(),
-    }).then((res) => {
-      if (res.ok) return null;
-      return res.json().then((err) => Promise.reject(err));
-    });
+  // subscriptions
+
+  getSubscriptions({ page = 1, limit = 6, materials_limit = 3 } = {}) {
+    return fetch(
+      `/api/users/subscriptions/?page=${page}&limit=${limit}&materials_limit=${materials_limit}`,
+      {
+        method: "GET",
+        headers: this._getHeaders(true),
+      }
+    ).then(this._checkResponse);
+  }
+
+  deleteSubscriptions({ author_id }) {
+    return fetch(`/api/users/${author_id}/subscribe/`, {
+      method: "DELETE",
+      headers: this._getHeaders(true),
+    }).then(this._checkResponse);
+  }
+
+  subscribe({ author_id }) {
+    return fetch(`/api/users/${author_id}/subscribe/`, {
+      method: "POST",
+      headers: this._getHeaders(true),
+    }).then(this._checkResponse);
   }
 }
 
-const api = new Api({
-  baseUrl: BASE_URL,
+export default new Api(process.env.API_URL || "http://localhost", {
+  "content-type": "application/json",
 });
-
-export default api;

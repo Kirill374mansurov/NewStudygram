@@ -1,184 +1,104 @@
-import {
-  Card,
-  Title,
-  Pagination,
-  CardList,
-  Button,
-  CheckboxGroup,
-  Container,
-  Main,
-  Icons,
-} from "../../components";
-import cn from "classnames";
-import styles from "./styles.module.css";
-import { useRecipes } from "../../utils/index.js";
-import { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import api from "../../api";
-import { useParams, useHistory } from "react-router-dom";
-import { AuthContext, UserContext } from "../../contexts";
-import MetaTags from "react-meta-tags";
-import DefaultImage from "../../images/userpic-icon.jpg";
+import MaterialCard from "../../components/material-card";
 
-const UserPage = ({ updateOrders }) => {
-  const {
-    recipes,
-    setRecipes,
-    recipesCount,
-    setRecipesCount,
-    recipesPage,
-    setRecipesPage,
-    tagsValue,
-    setTagsValue,
-    handleTagsChange,
-    handleLike,
-    handleAddToCart,
-  } = useRecipes();
+function User() {
   const { id } = useParams();
-  const [user, setUser] = useState(null);
-  const [subscribed, setSubscribed] = useState(false);
-  const history = useHistory();
-  const userContext = useContext(UserContext);
-  const authContext = useContext(AuthContext);
 
-  const getRecipes = ({ page = 1, tags }) => {
-    api.getRecipes({ page, author: id, tags }).then((res) => {
-      const { results, count } = res;
-      setRecipes(results);
-      setRecipesCount(count);
-    });
-  };
+  const [author, setAuthor] = useState(null);
+  const [materials, setMaterials] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const getUser = () => {
-    api
-      .getUser({ id })
-      .then((res) => {
-        setUser(res);
-        setSubscribed(res.is_subscribed);
+  const loadUserPage = () => {
+    setLoading(true);
+
+    Promise.all([
+      api.getUser({ id }),
+      api.getMaterials({ author: id }),
+    ])
+      .then(([userData, materialsData]) => {
+        setAuthor(userData);
+        setMaterials(
+          Array.isArray(materialsData)
+            ? materialsData
+            : materialsData.results || []
+        );
       })
       .catch((err) => {
-        history.push("/not-found");
+        console.error("Ошибка загрузки пользователя:", err);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
-  useEffect(
-    (_) => {
-      if (!user) {
-        return;
-      }
-      getRecipes({ page: recipesPage, tags: tagsValue, author: user.id });
-    },
-    [recipesPage, tagsValue, user]
-  );
+  useEffect(() => {
+    loadUserPage();
+  }, [id]);
 
-  useEffect((_) => {
-    getUser();
-  }, []);
+  const handleSubscribe = () => {
+    const request = author.is_subscribed
+      ? api.deleteSubscriptions({ author_id: author.id })
+      : api.subscribe({ author_id: author.id });
 
-  useEffect((_) => {
-    api.getTags().then((tags) => {
-      setTagsValue(tags.map((tag) => ({ ...tag, value: true })));
-    });
-  }, []);
+    request
+      .then(() => {
+        setAuthor({
+          ...author,
+          is_subscribed: !author.is_subscribed,
+        });
+      })
+      .catch((err) => {
+        console.error("Ошибка подписки:", err);
+        alert("Чтобы подписываться, нужно войти в аккаунт.");
+      });
+  };
+
+  if (loading) {
+    return <p style={{ padding: "24px" }}>Загрузка...</p>;
+  }
+
+  if (!author) {
+    return <p style={{ padding: "24px" }}>Пользователь не найден.</p>;
+  }
 
   return (
-    <Main>
-      <Container className={styles.container}>
-        <MetaTags>
-          <title>
-            {user
-              ? `${user.first_name} ${user.last_name}`
-              : "Страница пользователя"}
-          </title>
-          <meta
-            name="description"
-            content={
-              user
-                ? `Фудграм - ${user.first_name} ${user.last_name}`
-                : "Фудграм - Страница пользователя"
-            }
-          />
-          <meta
-            property="og:title"
-            content={
-              user
-                ? `${user.first_name} ${user.last_name}`
-                : "Страница пользователя"
-            }
-          />
-        </MetaTags>
-        <div className={styles.title}>
-          <div className={styles.titleTextBox}>
-            <div className={styles.user}>
-              <div
-                className={styles.userAvatar}
-                style={{
-                  "background-image": `url(${
-                    (user && user.avatar) || DefaultImage
-                  })`,
-                }}
-              />
-              <Title
-                className={cn({
-                  [styles.titleText]: true,
-                })}
-                title={user ? `${user.first_name} ${user.last_name}` : ""}
-              />
-            </div>
+    <main style={{ maxWidth: "960px", margin: "0 auto", padding: "24px" }}>
+      <h1>{author.username}</h1>
 
-            {(userContext || {}).id !== (user || {}).id && authContext && (
-              <Button
-                className={cn(styles.buttonSubscribe, {
-                  [styles.buttonSubscribeActive]: subscribed,
-                })}
-                modifier={subscribed ? "style_dark" : "style_light"}
-                clickHandler={(_) => {
-                  const method = subscribed
-                    ? api.deleteSubscriptions.bind(api)
-                    : api.subscribe.bind(api);
-                  method({
-                    author_id: id,
-                  }).then((_) => {
-                    setSubscribed(!subscribed);
-                  });
-                }}
-              >
-                <Icons.AddUser />{" "}
-                {subscribed ? "Отписаться от автора" : "Подписаться на автора"}
-              </Button>
-            )}
-          </div>
+      <p>{author.email}</p>
 
-          <CheckboxGroup
-            values={tagsValue}
-            handleChange={(value) => {
-              setRecipesPage(1);
-              handleTagsChange(value);
-            }}
-          />
-        </div>
-
-        {recipes.length > 0 && (
-          <CardList>
-            {recipes.map((card) => (
-              <Card
-                {...card}
-                key={card.id}
-                updateOrders={updateOrders}
-                handleLike={handleLike}
-                handleAddToCart={handleAddToCart}
-              />
-            ))}
-          </CardList>
-        )}
-        <Pagination
-          count={recipesCount}
-          limit={6}
-          page={recipesPage}
-          onPageChange={(page) => setRecipesPage(page)}
+      {author.avatar && (
+        <img
+          src={author.avatar}
+          alt={author.username}
+          style={{
+            width: "120px",
+            height: "120px",
+            objectFit: "cover",
+            borderRadius: "50%",
+          }}
         />
-      </Container>
-    </Main>
-  );
-};
+      )}
 
-export default UserPage;
+      <div style={{ margin: "16px 0" }}>
+        <button type="button" onClick={handleSubscribe}>
+          {author.is_subscribed ? "Отписаться" : "Подписаться"}
+        </button>
+      </div>
+
+      <h2>Материалы автора</h2>
+
+      {materials.length > 0 ? (
+        materials.map((material) => (
+          <MaterialCard key={material.id} material={material} />
+        ))
+      ) : (
+        <p>У автора пока нет материалов.</p>
+      )}
+    </main>
+  );
+}
+
+export default User;

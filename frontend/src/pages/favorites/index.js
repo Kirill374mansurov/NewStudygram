@@ -1,82 +1,63 @@
-import { Card, Title, Pagination, CardList, Container, Main, CheckboxGroup  } from '../../components'
-import styles from './styles.module.css'
-import { useRecipes } from '../../utils/index.js'
-import { useEffect } from 'react'
-import api from '../../api'
-import MetaTags from 'react-meta-tags'
+import React, { useEffect, useState } from "react";
+import api from "../../api";
+import MaterialCard from "../../components/material-card";
 
-const Favorites = ({ updateOrders }) => {
-  const {
-    recipes,
-    setRecipes,
-    recipesCount,
-    setRecipesCount,
-    recipesPage,
-    setRecipesPage,
-    tagsValue,
-    handleTagsChange,
-    setTagsValue,
-    handleLike,
-    handleAddToCart
-  } = useRecipes()
-  
-  const getRecipes = ({ page = 1, tags }) => {
+function Favorites() {
+  const [materials, setMaterials] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadFavorites = () => {
+    setLoading(true);
+
     api
-      .getRecipes({ page, is_favorited: Number(true), tags })
-      .then(res => {
-        const { results, count } = res
-        setRecipes(results)
-        setRecipesCount(count)
+      .getMaterials({ is_favorited: 1 })
+      .then((data) => {
+        setMaterials(Array.isArray(data) ? data : data.results || []);
       })
-  }
-
-  useEffect(_ => {
-    getRecipes({ page: recipesPage, tags: tagsValue })
-  }, [recipesPage, tagsValue])
-
-  useEffect(_ => {
-    api.getTags()
-      .then(tags => {
-        setTagsValue(tags.map(tag => ({ ...tag, value: true })))
+      .catch((err) => {
+        console.error("Ошибка загрузки избранного:", err);
       })
-  }, [])
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
+  useEffect(() => {
+    loadFavorites();
+  }, []);
 
-  return <Main>
-    <Container>
-      <MetaTags>
-        <title>Избранное</title>
-        <meta name="description" content="Фудграм - Избранное" />
-        <meta property="og:title" content="Избранное" />
-      </MetaTags>
-      <div className={styles.title}>
-        <Title title='Избранное' />
-        <CheckboxGroup
-          values={tagsValue}
-          handleChange={value => {
-            setRecipesPage(1)
-            handleTagsChange(value)
-          }}
-        />
-      </div>
-      {recipes.length > 0 && <CardList>
-        {recipes.map(card => <Card
-          {...card}
-          key={card.id}
-          updateOrders={updateOrders}
-          handleLike={handleLike}
-          handleAddToCart={handleAddToCart}
-        />)}
-      </CardList>}
-      <Pagination
-        count={recipesCount}
-        limit={6}
-        page={recipesPage}
-        onPageChange={page => setRecipesPage(page)}
-      />
-    </Container>
-  </Main>
+  const handleFavorite = (material) => {
+    api
+      .removeFromFavorites({ id: material.id })
+      .then(() => {
+        setMaterials((prevMaterials) =>
+          prevMaterials.filter((item) => item.id !== material.id)
+        );
+      })
+      .catch((err) => {
+        console.error("Ошибка удаления из избранного:", err);
+      });
+  };
+
+  return (
+    <main style={{ maxWidth: "960px", margin: "0 auto", padding: "24px" }}>
+      <h1>Избранное</h1>
+
+      {loading ? (
+        <p>Загрузка...</p>
+      ) : materials.length > 0 ? (
+        materials.map((material) => (
+          <MaterialCard
+            key={material.id}
+            material={material}
+            onFavorite={handleFavorite}
+          />
+        ))
+      ) : (
+        <p>В избранном пока ничего нет.</p>
+      )}
+    </main>
+  );
 }
 
-export default Favorites
-
+export default Favorites;
