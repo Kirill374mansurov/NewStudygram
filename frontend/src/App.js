@@ -229,87 +229,25 @@ function App() {
               component={User}
               updateOrders={updateOrders}
             />
-            <ProtectedRoute
-              exact
-              path="/cart"
-              component={Cart}
-              orders={orders}
-              loggedIn={loggedIn}
-              updateOrders={updateOrders}
-            />
-            <ProtectedRoute
-              exact
-              path="/subscriptions"
-              component={Subscriptions}
-              loggedIn={loggedIn}
-            />
-
-            <ProtectedRoute
-              exact
-              path="/favorites"
-              component={Favorites}
-              loggedIn={loggedIn}
-              updateOrders={updateOrders}
-            />
-
-            <ProtectedRoute
-              exact
-              path="/recipes/create"
-              component={RecipeCreate}
-              loggedIn={loggedIn}
-            />
-
-            <ProtectedRoute
-              exact
-              path="/recipes/:id/edit"
-              component={RecipeEdit}
-              loggedIn={loggedIn}
-              loadItem={loadSingleItem}
-              onItemDelete={getOrders}
-            />
-            <ProtectedRoute
-              exact
-              path="/change-password"
-              component={ChangePassword}
-              loggedIn={loggedIn}
-              submitError={changePasswordError}
-              setSubmitError={setChangePasswordError}
-              onPasswordChange={changePassword}
-            />
-
-            <ProtectedRoute
-              exact
-              path="/change-avatar"
-              component={UpdateAvatar}
-              loggedIn={loggedIn}
-              onAvatarChange={changeAvatar}
-            />
-
-            <Route exact path="/recipes/:id">
-              <SingleCard
-                loggedIn={loggedIn}
-                loadItem={loadSingleItem}
-                updateOrders={updateOrders}
-              />
+            <Route exact path="/">
+                <Redirect to="/materials" />
             </Route>
 
-            <Route exact path="/about">
-              <NotFound />
-              {/* <About component={About} /> */}
+            <Route exact path="/materials">
+                <MaterialsFeed />
             </Route>
 
-            <Route exact path="/reset-password">
-              <ResetPassword onPasswordReset={onPasswordReset} />
+            <Route exact path="/materials/:id">
+                <MaterialPage />
             </Route>
 
-            <Route exact path="/technologies">
-              <NotFound />
-              {/* <Technologies component={Technologies}/> */}
-            </Route>
+            <ProtectedRoute exact path="/materials/create" component={MaterialCreate} />
 
-            <Route exact path="/recipes">
-              <Main updateOrders={updateOrders} />
-            </Route>
+            <ProtectedRoute exact path="/materials/:id/edit" component={MaterialEdit} />
+
+            <ProtectedRoute exact path="/favorites" component={Favorites} />
+
+            <ProtectedRoute exact path="/subscriptions" component={Subscriptions} />
 
             <Route exact path="/signin">
               <SignIn
