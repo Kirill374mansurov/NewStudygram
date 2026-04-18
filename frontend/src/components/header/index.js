@@ -1,25 +1,46 @@
-import styles from './style.module.css'
-import { Nav, AccountMenu, LinkComponent } from '../index.js'
-import Container from '../container'
-import LogoHeader from '../../images/logo-header.png'
+import React from "react";
+import { Link } from "react-router-dom";
 
-const Header = ({ loggedIn, onSignOut, orders }) => {
-  return <header className={styles.header}>
-    <Container>
-      <div className={styles.headerContent}>
-        <LinkComponent
-          className={styles.headerLink}
-          title={<img className={styles.headerLogo} src={LogoHeader} alt='Foodgram' />}
-          href='/'
-        />
-        <Nav
-          loggedIn={loggedIn}
-          onSignOut={onSignOut}
-          orders={orders}
-        />
-      </div>
-    </Container>
-  </header>
-}
+const Header = ({ loggedIn, onSignOut }) => {
+  return (
+    <header style={{
+      padding: "16px 24px",
+      borderBottom: "1px solid #ddd",
+      marginBottom: "24px"
+    }}>
+      <nav style={{
+        display: "flex",
+        gap: "16px",
+        alignItems: "center"
+      }}>
+        <Link to="/materials">
+          <b>Studygram</b>
+        </Link>
 
-export default Header
+        <Link to="/materials">Материалы</Link>
+
+        {loggedIn && (
+          <>
+            <Link to="/materials/create">Создать материал</Link>
+            <Link to="/favorites">Избранное</Link>
+            <Link to="/subscriptions">Подписки</Link>
+            <Link to="/update-avatar">Аватар</Link>
+            <Link to="/change-password">Пароль</Link>
+            <button type="button" onClick={onSignOut}>
+              Выйти
+            </button>
+          </>
+        )}
+
+        {!loggedIn && (
+          <>
+            <Link to="/signin">Войти</Link>
+            <Link to="/signup">Регистрация</Link>
+          </>
+        )}
+      </nav>
+    </header>
+  );
+};
+
+export default Header;
