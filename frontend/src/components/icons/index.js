@@ -9,14 +9,11 @@ import ArrowLeftIcon from "./arrow-left";
 import ArrowRightIcon from "./arrow-right";
 import PlusIcon from "./plus";
 import DoneIcon from "./done";
-import IngredientDelete from "./ingredient-delete";
 import SavedMenu from "./saved-menu";
 import SubscriptionsMenu from "./subscriptions-menu";
 import LogoutMenu from "./logout-menu";
 import ResetPasswordMenu from "./reset-password-menu";
-import Cart from "./cart";
 import AddUser from "./add-user";
-import ReceiptDelete from "./receipt-delete";
 import ArrowExpand from "./arrow-expand";
 import PaginationArrow from "./pagination-arrow";
 import PopupClose from "./popup-close";
@@ -26,9 +23,7 @@ import CopyLinkIcon from "./copy-link";
 
 export default {
   StarIcon,
-  ReceiptDelete,
   PopupClose,
-  Cart,
   StarActiveIcon,
   AddUser,
   ClockIcon,
@@ -36,7 +31,6 @@ export default {
   PaginationArrow,
   CheckIcon,
   ArrowLeftIcon,
-  IngredientDelete,
   ArrowRightIcon,
   PlusIcon,
   DoneIcon,

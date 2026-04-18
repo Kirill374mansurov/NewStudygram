@@ -24,7 +24,7 @@ const SignIn = ({ onSignIn, submitError, setSubmitError }) => {
 
   return (
     <Main withBG asFlex>
-      {authContext && <Redirect to="/recipes" />}
+      {authContext && <Redirect to="/materials" />}
       <Container className={styles.center}>
         <MetaTags>
           <title>Войти на сайт</title>

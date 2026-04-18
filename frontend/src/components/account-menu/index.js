@@ -1,35 +1,81 @@
-import styles from './styles.module.css'
-import { useContext } from 'react'
-import { LinkComponent, Account, Button } from '../index.js'
-import { AuthContext } from '../../contexts'
-import { useLocation } from 'react-router-dom'
-import { NotLoggedInMenu } from '../../configs/navigation'
+import styles from "./style.module.css";
+import { useContext } from "react";
+import { LinkComponent } from "../index.js";
+import { AuthContext, UserContext } from "../../contexts";
+import DefaultImage from "../../images/userpic-icon.jpg";
 
-const AccountMenu = ({ onSignOut, orders }) => {
-  const authContext = useContext(AuthContext)
-  const location = useLocation()
+const AccountMenu = ({ onSignOut }) => {
+  const authContext = useContext(AuthContext);
+  const userContext = useContext(UserContext);
+
   if (!authContext) {
-    return <div className={styles.menu}>
-      {NotLoggedInMenu.map(item => {
-        return location.pathname === item.href ? <Button
-          href={item.href}
-          modifier='style_dark'
-          className={styles.menuButton}
-        >
-          {item.title}
-        </Button> : <LinkComponent
-          title={item.title}
-          href={item.href}
-          exact
-          className={styles.menuLink}
+    return (
+      <div className={styles.accountMenu}>
+        <LinkComponent
+          href="/signin"
+          className={styles.accountMenu__link}
+          title="Войти"
         />
-      })}
-    </div>
+
+        <LinkComponent
+          href="/signup"
+          className={styles.accountMenu__button}
+          title="Регистрация"
+        />
+      </div>
+    );
   }
-  return <div className={styles.menu}>
-    <Account onSignOut={onSignOut} orders={orders} />
-  </div>
-}
 
+  return (
+    <div className={styles.accountMenu}>
+      <LinkComponent
+        href="/materials/create"
+        className={styles.accountMenu__link}
+        title="Создать материал"
+      />
 
-export default AccountMenu
+      <LinkComponent
+        href="/favorites"
+        className={styles.accountMenu__link}
+        title="Избранное"
+      />
+
+      <LinkComponent
+        href="/subscriptions"
+        className={styles.accountMenu__link}
+        title="Подписки"
+      />
+
+      <LinkComponent
+        href="/user"
+        className={styles.accountMenu__profile}
+        title={
+          <>
+            <span
+              className={styles.accountMenu__avatar}
+              style={{
+                backgroundImage: `url(${userContext?.avatar || DefaultImage})`,
+              }}
+            />
+
+            <span className={styles.accountMenu__name}>
+              {userContext?.first_name ||
+                userContext?.username ||
+                "Профиль"}
+            </span>
+          </>
+        }
+      />
+
+      <button
+        type="button"
+        className={styles.accountMenu__logout}
+        onClick={onSignOut}
+      >
+        Выйти
+      </button>
+    </div>
+  );
+};
+
+export default AccountMenu;

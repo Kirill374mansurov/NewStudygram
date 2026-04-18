@@ -1,76 +1,87 @@
 .nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 24px;
   width: 100%;
 }
 
 .nav__container {
   display: flex;
-  justify-content: space-between;
-  height: 100%;
   align-items: center;
+  gap: 32px;
 }
-
-.nav__orders {
-  display: none;
-  text-decoration: none;
-}
-
 
 .menuButton {
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
   display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid #e6e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.menuButton:hover {
+  border-color: #c9bcff;
+  background: #f6f3ff;
 }
 
 .menuButton img {
-  width: 100%;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
 }
 
 .nav__container-mobile {
   display: none;
-  position: absolute;
-  top: 100px;
-  left: 0;
-  width: 100%;
-  background: #FFF;
-  border-radius: 8px;
-  padding: 20px 50px;
-  z-index: 3;
-  justify-content: space-between; 
 }
 
-.nav__container-mobile_visible {
-  display: flex;
-}
-
-@media screen and (max-width: 770px) {
-  .menuButton {
-    display: block
-  }
-
-  .nav__orders {
-    display: block;
-  }
-
+@media screen and (max-width: 900px) {
   .nav {
-    display: flex;
-    align-items: center;
     justify-content: flex-end;
   }
 
   .nav__container {
     display: none;
   }
-}
 
-@media screen and (max-width: 610px) {
-  .nav__container-mobile {
-    flex-direction: column-reverse;
+  .menuButton {
+    display: inline-flex;
   }
 
   .nav__container-mobile {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 24px;
+    z-index: 20;
+
+    display: none;
+    width: min(360px, calc(100vw - 48px));
+    padding: 24px;
+
+    border: 1px solid #e6e8f0;
+    border-radius: 24px;
+    background: #ffffff;
+    box-shadow: 0 20px 50px rgba(16, 24, 40, 0.14);
+  }
+
+  .nav__container-mobile_visible {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+}
+
+@media screen and (max-width: 520px) {
+  .nav__container-mobile {
+    right: 16px;
+    width: calc(100vw - 32px);
     padding: 20px;
+    border-radius: 20px;
   }
-
 }
-

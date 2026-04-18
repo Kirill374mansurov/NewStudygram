@@ -1,42 +1,38 @@
-import styles from './style.module.css'
-import { Container, LinkComponent } from '../index'
-import LogoFooter from '../../images/logo-footer.png'
+import React from "react";
+import { Link } from "react-router-dom";
+import styles from "./style.module.css";
 
 const Footer = () => {
-  return <footer className={styles.footer}>
-    <Container className={styles.footer__container}>
-      <LinkComponent
-        href='#'
-        className={styles.footer__brand}
-        title={<img src={LogoFooter} className={styles.footer__logo} />}
-      />
+  return (
+    <footer className={styles.footer}>
+      <div className={styles.footerContainer}>
+        <div>
+          <Link to="/materials" className={styles.logo}>
+            Studygram
+          </Link>
+          <p className={styles.description}>
+            Платформа для поиска, создания и сохранения учебных материалов.
+          </p>
+        </div>
 
-      <div className={styles['footer__menu']}>
-        <ul className={styles['footer__menu-list']}>
-          <li className={styles['footer__menu-item']}>
-            <LinkComponent
-              title='О проекте'
-              href='/about'
-              exact
-              className={styles['footer__menu-link']}
-            />
-          </li>
-          <li className={styles['footer__menu-item']}>
-            <LinkComponent
-              title='Технологии'
-              href='/technologies'
-              exact
-              className={styles['footer__menu-link']}
-            />
-          </li>
-        </ul>
+        <nav className={styles.nav}>
+          <Link to="/materials" className={styles.link}>
+            Материалы
+          </Link>
+          <Link to="/materials/create" className={styles.link}>
+            Создать материал
+          </Link>
+          <Link to="/favorites" className={styles.link}>
+            Избранное
+          </Link>
+        </nav>
+
+        <p className={styles.copyright}>
+          © {new Date().getFullYear()} Studygram
+        </p>
       </div>
+    </footer>
+  );
+};
 
-      <div class={styles.footer__copyright}>
-      © {(new Date()).getFullYear()}
-      </div>
-    </Container>
-  </footer>
-}
-
-export default Footer
+export default Footer;

@@ -162,5 +162,5 @@ class StudyMaterialViewSet(viewsets.ModelViewSet):
 
 def redirect_material(request, short_id):
     short_link = os.getenv('ALLOWED_HOST') + short_id
-    recipe = get_object_or_404(StudyMaterial, short_link=short_link)
-    return redirect(f'/recipes/{recipe.id}')
+    material = get_object_or_404(StudyMaterial, short_link=short_link)
+    return redirect(f'/materials/{material.id}')

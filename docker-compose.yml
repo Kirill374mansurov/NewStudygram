@@ -15,7 +15,7 @@ services:
 
   backend:
     container_name: studygram-back
-    build: /backend
+    build: ./backend
     env_file: .env
     depends_on:
       - db
@@ -27,10 +27,10 @@ services:
 
   frontend:
     container_name: studygram-front
-    build: /frontend
+    build: ./frontend
     env_file: .env
     volumes:
-      - static:/app/build/
+      - static:/app/result_build/
 
   nginx:
     container_name: studygram-proxy

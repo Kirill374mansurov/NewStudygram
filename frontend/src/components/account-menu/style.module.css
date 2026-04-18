@@ -1,0 +1,79 @@
+.accountMenu {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.accountMenu__link {
+  color: #344054;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.accountMenu__link:hover {
+  color: #5b3cc4;
+}
+
+.accountMenu__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #5b3cc4;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.accountMenu__button:hover {
+  background: #4b2fb3;
+}
+
+.accountMenu__profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #344054;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.accountMenu__avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background-position: center;
+  background-size: cover;
+  border: 1px solid #e6e8f0;
+}
+
+.accountMenu__name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accountMenu__logout {
+  border: none;
+  background: transparent;
+  color: #667085;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.accountMenu__logout:hover {
+  color: #5b3cc4;
+}
+
+@media screen and (max-width: 900px) {
+  .accountMenu {
+    display: none;
+  }
+}

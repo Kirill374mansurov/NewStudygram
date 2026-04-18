@@ -1,55 +1,70 @@
-import { Title, Container, Main } from '../../components'
-import styles from './styles.module.css'
-import MetaTags from 'react-meta-tags'
+import { Container, Main } from "../../components";
+import styles from "./styles.module.css";
+import MetaTags from "react-meta-tags";
+import { Link } from "react-router-dom";
 
-const About = ({ updateOrders, orders }) => {
-  
-  return <Main>
-    <MetaTags>
-      <title>О проекте</title>
-      <meta name="description" content="Фудграм - О проекте" />
-      <meta property="og:title" content="О проекте" />
-    </MetaTags>
-    
-    <Container>
-      <h1 className={styles.title}>Привет!</h1>
-      <div className={styles.content}>
-        <div>
-          <h2 className={styles.subtitle}>Что это за сайт?</h2>
-          <div className={styles.text}>
-            <p className={styles.textItem}>
-              Представляю вам проект, созданный во время обучения в Яндекс Практикуме. Этот проект — часть учебного курса, но он создан полностью самостоятельно.
-            </p>
-            <p className={styles.textItem}>
-              Цель этого сайта — дать возможность пользователям создавать и хранить рецепты на онлайн-платформе. Кроме того, можно скачать список продуктов, необходимых для
-              приготовления блюда, просмотреть рецепты друзей и добавить любимые рецепты в список избранных.
-            </p>
-            <p className={styles.textItem}>
-              Чтобы использовать все возможности сайта — нужна регистрация. Проверка адреса электронной почты не осуществляется, вы можете ввести любой email. 
-            </p>
-            <p className={styles.textItem}>
-              Заходите и делитесь своими любимыми рецептами!
-            </p>
+const About = () => {
+  return (
+    <Main>
+      <MetaTags>
+        <title>О проекте — Studygram</title>
+        <meta
+          name="description"
+          content="Studygram — платформа для создания и поиска учебных материалов."
+        />
+        <meta property="og:title" content="О проекте — Studygram" />
+      </MetaTags>
+
+      <Container>
+        <section className={styles.about}>
+          <p className={styles.badge}>О проекте</p>
+
+          <h1 className={styles.title}>Studygram</h1>
+
+          <p className={styles.lead}>
+            Studygram — это платформа для поиска, создания и сохранения
+            учебных материалов. Здесь можно собрать полезные статьи, видео,
+            курсы и другие ресурсы в одном месте.
+          </p>
+
+          <div className={styles.cards}>
+            <article className={styles.card}>
+              <h2>Создавайте материалы</h2>
+              <p>
+                Добавляйте учебные материалы с описанием, ссылкой, темами,
+                уровнем сложности и примерным временем изучения.
+              </p>
+            </article>
+
+            <article className={styles.card}>
+              <h2>Ищите по темам</h2>
+              <p>
+                Используйте темы, чтобы быстро находить материалы по нужному
+                направлению обучения.
+              </p>
+            </article>
+
+            <article className={styles.card}>
+              <h2>Сохраняйте полезное</h2>
+              <p>
+                Добавляйте материалы в избранное и возвращайтесь к ним позже.
+              </p>
+            </article>
           </div>
-        </div>
-        <aside>
-          <h2 className={styles.additionalTitle}>
-            Ссылки
-          </h2>
-          <div className={styles.text}>
-            <p className={styles.textItem}>
-              Код проекта находится тут - <a href="#" className={styles.textLink}>Github</a>
-            </p>
-            <p className={styles.textItem}>
-              Автор проекта: <a href="#" className={styles.textLink}>Имя Автора</a>
-            </p>
+
+          <div className={styles.actions}>
+            <Link to="/materials" className={styles.primaryLink}>
+              Перейти к материалам
+            </Link>
+
+            <Link to="/materials/create" className={styles.secondaryLink}>
+              Создать материал
+            </Link>
           </div>
-        </aside>
-      </div>
-      
-    </Container>
-  </Main>
-}
+        </section>
+      </Container>
+    </Main>
+  );
+};
 
-export default About
-
+export default About;

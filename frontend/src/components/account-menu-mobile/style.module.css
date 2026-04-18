@@ -1,0 +1,74 @@
+.accountMenuMobile {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 20px;
+  border-top: 1px solid #e6e8f0;
+}
+
+.accountMenuMobile__link {
+  color: #344054;
+  font-size: 18px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.accountMenuMobile__link:hover {
+  color: #5b3cc4;
+}
+
+.accountMenuMobile__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  width: fit-content;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: #5b3cc4;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.accountMenuMobile__profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #344054;
+  font-size: 18px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.accountMenuMobile__avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-position: center;
+  background-size: cover;
+  border: 1px solid #e6e8f0;
+}
+
+.accountMenuMobile__logout {
+  width: fit-content;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: #667085;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.accountMenuMobile__logout:hover {
+  color: #5b3cc4;
+}
+
+@media screen and (min-width: 901px) {
+  .accountMenuMobile {
+    display: none;
+  }
+}

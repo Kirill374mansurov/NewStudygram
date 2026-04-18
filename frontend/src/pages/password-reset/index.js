@@ -10,7 +10,7 @@ const ResetPassword = ({ onPasswordReset }) => {
   const { values, handleChange, isValid, resetForm } = useFormWithValidation()
   const authContext = useContext(AuthContext)
 
-  {authContext && <Redirect to='/recipes' />}
+  {authContext && <Redirect to='/materials' />}
 
   return <Main withBG asFlex>
     <Container className={styles.center}>

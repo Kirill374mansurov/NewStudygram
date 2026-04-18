@@ -1,45 +1,24 @@
-import Icons from "../components/icons"
-
-export default [
-  {
-    title: 'Рецепты',
-    href: '/recipes',
-    auth: false
-  }, {
-    title: 'Создать рецепт',
-    href: '/recipes/create',
-    auth: true
-  }
-]
+import Icons from "../components/icons";
 
 export const UserMenu = [
   {
-    title: 'Мои подписки',
-    href: '/subscriptions',
-    auth: true,
-    icon: <Icons.SubscriptionsMenu />
-  }, {
-    title: 'Избранное',
-    href: '/favorites',
-    auth: true,
-    icon: <Icons.SavedMenu />
-  }, {
-    
-    title: 'Сменить пароль',
-    href: '/change-password',
-    auth: true,
-    icon: <Icons.ResetPasswordMenu />
-  }
-]
-
-export const NotLoggedInMenu = [
+    title: "Мои материалы",
+    href: "/materials/create",
+    icon: <Icons.PlusIcon />,
+  },
   {
-    title: 'Войти',
-    href: '/signin',
-    auth: false
-  }, {
-    title: 'Создать аккаунт',
-    href: '/signup',
-    auth: false
-  }
-]
+    title: "Избранное",
+    href: "/favorites",
+    icon: <Icons.FavoritesIcon />,
+  },
+  {
+    title: "Подписки",
+    href: "/subscriptions",
+    icon: <Icons.SubscriptionsIcon />,
+  },
+  {
+    title: "Сменить пароль",
+    href: "/change-password",
+    icon: <Icons.PasswordIcon />,
+  },
+];

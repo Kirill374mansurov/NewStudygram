@@ -31,7 +31,7 @@ const ChangePassword = ({ onPasswordChange, submitError, setSubmitError }) => {
           <title>Изменить пароль</title>
           <meta
             name="description"
-            content="Фудграм - Изменить пароль"
+            content="Изменить пароль"
           />
           <meta property="og:title" content="Изменить пароль" />
         </MetaTags>

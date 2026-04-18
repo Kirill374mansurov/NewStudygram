@@ -1,137 +1,76 @@
-import styles from "./styles.module.css";
-import { useState } from "react";
-import { Button, LinkComponent, Popup } from "../index";
+import styles from "./style.module.css";
+import { LinkComponent } from "../index.js";
 import DefaultImage from "../../images/userpic-icon.jpg";
+import api from "../../api";
 
-const countForm = (number, titles) => {
-  number = Math.abs(number);
-  if (Number.isInteger(number)) {
-    let cases = [2, 0, 1, 1, 1, 2];
-    return titles[
-      number % 100 > 4 && number % 100 < 20
-        ? 2
-        : cases[number % 10 < 5 ? number % 10 : 5]
-    ];
+const Subscription = ({ author, onUnsubscribe }) => {
+  if (!author) {
+    return null;
   }
-  return titles[1];
-};
 
-const Subscription = ({
-  email,
-  first_name,
-  last_name,
-  username,
-  removeSubscription,
-  recipes_count,
-  id,
-  recipes,
-  avatar,
-}) => {
-  const shouldShowButton = recipes_count > 3;
-  const moreRecipes = recipes_count - 3;
-  const [toDelete, setToDelete] = useState(false);
+  const handleUnsubscribe = () => {
+    api
+      .deleteSubscriptions({ id: author.id })
+      .then(() => {
+        if (onUnsubscribe) {
+          onUnsubscribe(author.id);
+        }
+      })
+      .catch((err) => {
+        console.error("Ошибка отписки от автора:", err);
+        alert("Не удалось отписаться от автора.");
+      });
+  };
 
   return (
-    <div className={styles.subscription}>
-      {toDelete && (
-        <Popup
-          title="Вы уверены, что хотите отписаться?"
-          onSubmit={() => {
-            removeSubscription({
-              id,
-              callback: () => {
-                setToDelete(false);
-              },
-            });
-          }}
-          onClose={() => {
-            setToDelete(false);
+    <article className={styles.subscription}>
+      <div className={styles.author}>
+        <div
+          className={styles.avatar}
+          style={{
+            backgroundImage: `url(${author.avatar || DefaultImage})`,
           }}
         />
-      )}
-      <div className={styles.subscriptionHeader}>
-        <h2 className={styles.subscriptionTitle}>
-          <div
-            className={styles.subscriptionAvatar}
-            style={{
-              "background-image": `url(${avatar || DefaultImage})`,
-            }}
-          />
+
+        <div className={styles.authorInfo}>
           <LinkComponent
-            className={styles.subscriptionRecipeLink}
-            href={`/user/${id}`}
-            title={`${first_name} ${last_name}`}
+            href={`/users/${author.id}`}
+            className={styles.authorName}
+            title={
+              author.first_name || author.last_name
+                ? `${author.first_name || ""} ${author.last_name || ""}`.trim()
+                : author.username || "Автор"
+            }
           />
-        </h2>
-      </div>
-      <div className={styles.subscriptionBody}>
-        <ul className={styles.subscriptionItems}>
-          {recipes.map((recipe) => {
-            return (
-              <li className={styles.subscriptionItem} key={recipe.id}>
-                <LinkComponent
-                  className={styles.subscriptionRecipeLink}
-                  href={`/recipes/${recipe.id}`}
-                  title={
-                    <div className={styles.subscriptionRecipe}>
-                      <img
-                        src={recipe.image}
-                        alt={recipe.name}
-                        className={styles.subscriptionRecipeImage}
-                      />
-                      <h3 className={styles.subscriptionRecipeTitle}>
-                        {recipe.name}
-                      </h3>
-                      <p className={styles.subscriptionRecipeText}>
-                        {recipe.cooking_time} мин.
-                      </p>
-                    </div>
-                  }
-                />
-              </li>
-            );
-          })}
-          {shouldShowButton && (
-            <li className={styles.subscriptionMore}>
-              <LinkComponent
-                className={styles.subscriptionLink}
-                title={`Еще ${moreRecipes} ${countForm(moreRecipes, [
-                  "рецепт",
-                  "рецепта",
-                  "рецептов",
-                ])}...`}
-                href={`/user/${id}`}
-              />
-            </li>
+
+          {author.email && (
+            <p className={styles.authorEmail}>
+              {author.email}
+            </p>
           )}
-        </ul>
+
+          <p className={styles.authorDescription}>
+            Учебные материалы автора доступны в вашей ленте подписок.
+          </p>
+        </div>
       </div>
-      <div className={styles.subscriptionFooter}>
-        <Button
-          className={styles.subscriptionButton}
-          clickHandler={(_) => {
-            setToDelete(true);
-          }}
+
+      <div className={styles.actions}>
+        <LinkComponent
+          href={`/materials?author=${author.id}`}
+          className={styles.materialsLink}
+          title="Материалы автора"
+        />
+
+        <button
+          type="button"
+          className={styles.unsubscribeButton}
+          onClick={handleUnsubscribe}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="20"
-            viewBox="0 0 16 20"
-            fill="none"
-          >
-            <path
-              d="M14 10H2"
-              stroke="black"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
           Отписаться
-        </Button>
+        </button>
       </div>
-    </div>
+    </article>
   );
 };
 
