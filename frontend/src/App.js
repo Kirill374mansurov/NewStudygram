@@ -200,10 +200,6 @@ function App() {
               <Materials />
             </Route>
 
-            <Route exact path="/materials/:id">
-              <MaterialDetail user={user} />
-            </Route>
-
             <ProtectedRoute
               exact
               path="/materials/create"
@@ -218,17 +214,23 @@ function App() {
               loggedIn={loggedIn}
             />
 
+            <Route exact path="/materials/:id">
+              <MaterialDetail user={user} />
+            </Route>
+
             <Route exact path="/signin">
               <SignIn
                 onSignIn={authorization}
-                error={authError}
+                submitError={authError}
+                setSubmitError={setAuthError}
               />
             </Route>
 
             <Route exact path="/signup">
               <SignUp
                 onSignUp={registration}
-                error={registrError}
+                submitError={registrError}
+                setSubmitError={setRegistrError}
               />
             </Route>
 
@@ -251,6 +253,7 @@ function App() {
               path="/users/:id"
               component={User}
               loggedIn={loggedIn}
+              user={user}
             />
 
             <ProtectedRoute

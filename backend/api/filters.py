@@ -10,7 +10,7 @@ class StudyMaterialFilter(filters.FilterSet):
     )
     author = filters.ModelChoiceFilter(
         queryset=User.objects.all(),
-        field_name='author__id'
+        field_name='author'
     )
     is_favorited = filters.BooleanFilter(method='filter_is_favorited')
 

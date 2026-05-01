@@ -28,7 +28,10 @@ const Input = ({
   const handleValueChange = (e) => {
     const value = e.target.value;
     setInputValue(value);
-    onChange(e);
+
+    if (onChange) {
+        onChange(e);
+    }
   };
   useEffect(() => {
     if (value !== inputValue) {
@@ -69,14 +72,14 @@ const Input = ({
               viewBox="0 0 15 14"
               fill="none"
             >
-              <g clip-path="url(#clip0_101_848)">
+              <g clipPath="url(#clip0_101_848)">
                 <circle cx="7.5" cy="7" r="7" fill="#FF3B30" />
                 <path
                   d="M5.85008 5.35011L7.5 7.00003M7.5 7.00003L9.14992 8.64994M7.5 7.00003L5.85008 8.64994M7.5 7.00003L9.14992 5.35011"
                   stroke="white"
-                  stroke-width="1.2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
               </g>
               <defs>
