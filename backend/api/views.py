@@ -18,7 +18,7 @@ from rest_framework.response import Response
 from .filters import StudyMaterialFilter
 from .models import (User, Subscription, Topic,
                      StudyMaterial, Favorite)
-from .permissions import OwnerOrReadOnly, ReadOnly
+from .permissions import StaffOwnerOrReadOnly, ReadOnly
 from .serializers import (StudyMaterialWriteSerializer,
                           StudyMaterialShortSerializer, TopicSerializer,
                           SubscriptionSerializer, UserSerializer,
@@ -65,10 +65,13 @@ class UserViewSet(views.UserViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(methods=['post', 'delete'], detail=True,
-            permission_classes=[IsAuthenticated])
-    def subscribe(self, request, pk=None):
-        author = get_object_or_404(User, pk=pk)
+    @action(
+        methods=['post', 'delete'],
+        detail=True,
+        permission_classes=[IsAuthenticated]
+    )
+    def subscribe(self, request, *args, **kwargs):
+        author = self.get_object()
         user = request.user
 
         if user == author:
@@ -91,7 +94,7 @@ class UserViewSet(views.UserViewSet):
 
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        subscription, created = Subscription.objects.get_or_create(
+        _, created = Subscription.objects.get_or_create(
             author=author,
             subscriber=user
         )
@@ -112,7 +115,9 @@ class UserViewSet(views.UserViewSet):
             permission_classes=[IsAuthenticated])
     def subscriptions(self, request):
         self.serializer_class = SubscriptionSerializer
-        authors = User.objects.filter(subscription__subscriber=request.user)
+        authors = User.objects.filter(
+            subscription__subscriber=request.user
+        ).distinct()
         page = self.paginate_queryset(authors)
         if page is not None:
             serializer = self.get_serializer(
@@ -137,7 +142,7 @@ class TopicViewSet(RetrieveListViewSet):
 class StudyMaterialViewSet(viewsets.ModelViewSet):
     queryset = StudyMaterial.objects.all().select_related(
         'author').prefetch_related('topics')
-    permission_classes = (OwnerOrReadOnly,)
+    permission_classes = (StaffOwnerOrReadOnly,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filterset_class = StudyMaterialFilter
     search_fields = ('title',)

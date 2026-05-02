@@ -20,7 +20,8 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'is_subscribed',
-            'avatar'
+            'avatar',
+            'is_staff',
         )
         lookup_field = 'username'
 

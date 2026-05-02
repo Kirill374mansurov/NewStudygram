@@ -2,7 +2,7 @@ import React from "react";
 import { Link, NavLink } from "react-router-dom";
 import styles from "./style.module.css";
 
-const Header = ({ loggedIn, onSignOut }) => {
+const Header = ({ loggedIn, onSignOut, user }) => {
   return (
     <header className={styles.header}>
       <div className={styles.headerContainer}>
@@ -17,9 +17,7 @@ const Header = ({ loggedIn, onSignOut }) => {
 
           {loggedIn ? (
             <>
-              <NavLink to="/materials/create" className={styles.link}>
-                Создать материал
-              </NavLink>
+              {loggedIn && user?.is_staff && (<NavLink to="/materials/create" className={styles.link}>Создать материал</NavLink>)}
               <NavLink to="/favorites" className={styles.link}>
                 Избранное
               </NavLink>

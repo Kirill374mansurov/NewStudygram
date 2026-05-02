@@ -189,7 +189,7 @@ function App() {
     <AuthContext.Provider value={loggedIn}>
       <UserContext.Provider value={user}>
         <div className={styles.app}>
-          <Header loggedIn={loggedIn} onSignOut={onSignOut} />
+          <Header loggedIn={loggedIn} onSignOut={onSignOut} user={user} />
 
           <Switch>
             <Route exact path="/">
