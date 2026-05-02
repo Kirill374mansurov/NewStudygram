@@ -67,31 +67,45 @@ class UserViewSet(views.UserViewSet):
 
     @action(methods=['post', 'delete'], detail=True,
             permission_classes=[IsAuthenticated])
-    def subscribe(self, request, id):
-        author = get_object_or_404(User, pk=id)
+    def subscribe(self, request, pk=None):
+        author = get_object_or_404(User, pk=pk)
+        user = request.user
+
+        if user == author:
+            return Response(
+                {'errors': 'Нельзя подписаться на самого себя.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         if request.method == 'DELETE':
-            try:
-                subscription = Subscription.objects.get(
-                    author=author, subscriber=request.user
+            deleted_count, _ = Subscription.objects.filter(
+                author=author,
+                subscriber=user
+            ).delete()
+
+            if not deleted_count:
+                return Response(
+                    {'errors': 'Подписка не найдена.'},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
-                subscription.delete()
-            except BaseException:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        self.serializer_class = SubscriptionSerializer
-        SubscriptionSerializer.validate(self, author, request.user)
+        subscription, created = Subscription.objects.get_or_create(
+            author=author,
+            subscriber=user
+        )
 
-        created = Subscription.objects.get_or_create(
-            author=author, subscriber=request.user)
-
-        if not created[-1]:
+        if not created:
             return Response(
-                {'errors': 'Уже подписаны!'},
-                status=status.HTTP_400_BAD_REQUEST)
-        serializer = self.get_serializer(
-            author, context={'request': request})
+                {'errors': 'Вы уже подписаны на этого автора.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = SubscriptionSerializer(
+            author,
+            context={'request': request}
+        )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(methods=['get'], detail=False,

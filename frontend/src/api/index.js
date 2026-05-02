@@ -19,14 +19,29 @@ class Api {
 
   _checkResponse(res) {
     if (res.status === 204) {
-      return Promise.resolve(null);
+        return Promise.resolve(null);
     }
 
-    return res.json().then((data) => {
+    const contentType = res.headers.get("content-type") || "";
+
+    if (contentType.includes("application/json")) {
+        return res.json().then((data) => {
       if (res.ok) {
         return data;
       }
-      return Promise.reject(data);
+        return Promise.reject(data);
+      });
+    }
+
+    return res.text().then((text) => {
+        if (res.ok) {
+            return text;
+        }
+
+        return Promise.reject({
+            status: res.status,
+            detail: text.slice(0, 300),
+        });
     });
   }
 
